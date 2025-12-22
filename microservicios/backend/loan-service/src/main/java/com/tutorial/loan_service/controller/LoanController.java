@@ -51,9 +51,9 @@ public class LoanController {
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable Long id) {
-        boolean result = loanService.delete(id);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Boolean> delete(@PathVariable Long id) throws Exception {
+        var result = loanService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/actives")
@@ -68,8 +68,8 @@ public class LoanController {
         return ResponseEntity.ok(loans);
     }
 
-    @GetMapping("/clients/{id}")
-    public ResponseEntity<List<Loan>> getLoansFromClient(@PathVariable Long id){
+    @GetMapping("/activesForClient/{id}")
+    public ResponseEntity<List<Loan>> getActiveLoansFromClient(@PathVariable Long id){
         List<Loan> clientLoans = loanService.getLoansFromClient(id);
         return ResponseEntity.ok(clientLoans);
     }

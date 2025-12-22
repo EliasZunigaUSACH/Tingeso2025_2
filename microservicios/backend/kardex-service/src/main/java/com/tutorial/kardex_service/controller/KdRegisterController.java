@@ -26,6 +26,12 @@ public class KdRegisterController {
         return ResponseEntity.ok(kdRegisters);
     }
 
+    @PostMapping
+    public ResponseEntity<KdRegister> create(@RequestBody KdRegister kdRegister) {
+        KdRegister newRegister = kdRegisterService.save(kdRegister);
+        return ResponseEntity.ok(newRegister);
+    }
+
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/dateRange")
     public ResponseEntity<List<KdRegister>> getByDateRange(@RequestParam(required = false) String startDate,

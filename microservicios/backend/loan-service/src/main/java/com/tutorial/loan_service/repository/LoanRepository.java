@@ -10,5 +10,5 @@ import java.util.List;
 public interface LoanRepository extends JpaRepository<Loan, Long> {
     List<Loan> findByIsActiveTrueAndIsDelayedTrue();
     List<Loan> findByIsActiveTrueAndIsDelayedFalse();
-    List<Loan> findByClientId(Long clientId);
+    List<Loan> findByClientIdAndIsActiveTrue(Long clientId);
 }

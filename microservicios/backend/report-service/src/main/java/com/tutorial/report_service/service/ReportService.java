@@ -35,6 +35,7 @@ public class ReportService {
         delayed = restTemplate.getForObject("http://loan-service/loans/delayed", List.class);
         report.setActiveLoans(trasnferToData(actives));
         report.setDelayedLoans(trasnferToData(delayed));
+        report.setClientsWithDelayedLoans(getClientsWithDelayedLoansCall());
         report.setTopTools(top10String);
         return reportRepository.save(report);
     }
@@ -79,5 +80,31 @@ public class ReportService {
             top10String.add(tool.getName() + " (" + tool.getId() + ")" + " - " + tool.getHistory().size() + " préstamos");
         }
         return top10String;
+    }
+
+    private List<String> getClientsWithDelayedLoansCall(){
+        List<Client> clients = restTemplate.getForObject("http://client-service/clients/withActiveDelayedLoans", List.class);
+        List<String> clientsNames = new ArrayList<>();
+        for (Client client : clients) {
+            int delayedCount = countDelayedLoans(client);
+            if (delayedCount > 0) {
+                clientsNames.add(
+                        client.getName() + " con " + delayedCount + " préstamos retrasados"
+                );
+            }
+        }
+        return clientsNames;
+    }
+
+    private int countDelayedLoans(Client client) {
+        List<LoanData> clientLoans = client.getLoans();
+        if (!clientLoans.isEmpty())  {
+            int count = 0;
+            for (LoanData loanData : clientLoans) {
+                if (loanData.getStatus().equals("Atrasado")) count++;
+            }
+            return count;
+        }
+        return 0;
     }
 }

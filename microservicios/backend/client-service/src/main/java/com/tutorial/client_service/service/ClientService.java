@@ -33,7 +33,7 @@ public class ClientService {
     }
 
     public Client updateClient(Client client) {
-        client.setRestricted((client.getFine() > 0L || detectDelayedLoans(client)));
+        client.setRestricted((client.getFine() > 0L) || (detectDelayedLoans(client)));
         return clientRepository.save(client);
     }
 
@@ -42,25 +42,24 @@ public class ClientService {
         return true;
     }
 
-    public List<String> getClientsWithDelayedLoans(){
-        List<Client> clients = clientRepository.findAll();
-
-        List<String> clientsWithDelayedLoans = new ArrayList<>();
+    public List<Client> getClientsWithDelayedLoans(){
+        List<Client> clients = clientRepository.findByLoansNotEmpty();
         for (Client client : clients) {
             int delayedCount = countDelayedLoans(client);
-            if (delayedCount > 0) {
-                clientsWithDelayedLoans.add(
-                        client.getName() + " con " + delayedCount + " préstamos retrasados"
-                );
-            }
+            if (delayedCount == 0) clients.remove(client);
         }
-        return clientsWithDelayedLoans;
+        return clients;
     }
 
     private boolean detectDelayedLoans(Client client) {
         Long clientID = client.getId();
-        List<Loan> clientLoans = restTemplate.getForObject("http://loan-service/loans/clients/" + clientID, Boolean.class);
-
+        List<Loan> clientLoans = getActiveLoansFromClient(clientID);
+        for (Loan loan : clientLoans) {
+            if (loan.isDelayed()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int countDelayedLoans(Client client) {
@@ -77,5 +76,9 @@ public class ClientService {
 
     public Loan getLoan(Long id){
         return restTemplate.getForObject("http://loan-service/loans/" + id, Loan.class);
+    }
+
+    public List<Loan> getActiveLoansFromClient(Long clientID){
+        return restTemplate.getForObject("http://loan-service/loans/activesForClient/" + clientID, List.class);
     }
 }

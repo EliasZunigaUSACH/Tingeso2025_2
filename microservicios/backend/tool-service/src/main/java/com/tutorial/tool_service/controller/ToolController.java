@@ -58,7 +58,7 @@ public class ToolController {
 
     @GetMapping("/top10")
     public ResponseEntity<List<Tool>> getTop10Tools(){
-        List<Tool> top10 = toolService.getAll();
+        List<Tool> top10 = toolService.getTop10Tools();
         return ResponseEntity.ok(top10);
     }
 

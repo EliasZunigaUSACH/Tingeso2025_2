@@ -39,18 +39,90 @@ public class LoanService {
         Client client = getClient(loan.getClientId());
         Tool tool = getTool(loan.getToolId());
         checkClientAndTool(client, tool);
+        loan.setToolName(tool.getName());
 
-        restTemplate.postForObject("http://kardex-service/kardex/createLoanRecord/" + client.getId() + "/" + tool.getId(), null, Void.class);
-        return loanRepository.save(loan);
+        Tariff tariff = restTemplate.getForObject("http://tariff-service/tariff/", Tariff.class);
+        loan.setTariffPerDay(tariff.getDailyTariff());
+        loan.setTotalTariff(0L);
+        loan.setDelayTariff(tariff.getDelayTariff());
+        loan.setDelayFine(0L);
+
+        Loan savedLoan = loanRepository.save(loan);
+
+        // Agregar datos del préstamo a la
+        LoanData data = createData(savedLoan, "Vigente");
+        List<LoanData> loanList = client.getLoans();
+        loanList.add(data);
+        client.setLoans(loanList);
+        registerLoanMovement(savedLoan, client, tool, "Prestamo");
+        updateClient(client);
+
+        LocalDate now = LocalDate.now();
+        String nowString = now.toString().split("T")[0];
+        if (nowString.equals(savedLoan.getDateStart())) {
+            tool.setStatus(2);
+            putToolInStock(tool);
+        }
+
+        registerLoanMovement(savedLoan, client, tool, "Prestamo");
+        return savedLoan;
     }
 
     public Loan update(Loan loan) {
-        return loanRepository.save(loan);
+        if (!loan.isActive()){
+            // Eliminar prestamo de la lista de prestamos activos del cliente
+            Client client = getClient(loan.getClientId());
+            List<LoanData> clientLoans = client.getLoans();
+            deleteLoanData(clientLoans, loan.getId());
+            client.setLoans(clientLoans);
+
+            // Calcular multa por atraso si es necesario
+            if (loan.isDelayed()){
+                Long daysLate = calculateDaysDiff(loan.getDateLimit(), loan.getDateReturn());
+                Long fine = calculateFine(daysLate, loan.getTariffPerDay());
+                loan.setDelayFine(fine);
+                client.setFine(client.getFine() + fine);
+            }
+
+            updateClient(client);
+
+            Loan updateLoan = loanRepository.save(loan);
+
+            // Actualizar herramienta
+            Tool tool = getTool(loan.getToolId());
+            List<LoanData> toolHistory = tool.getHistory();
+            LoanData updatedLoanData = createData(updateLoan, "Devuelto");
+            toolHistory.add(updatedLoanData);
+            tool.setHistory(toolHistory);
+            if (updateLoan.isToolGotDamaged()) tool.setStatus(1);
+            else tool.setStatus(3);
+            putToolInStock(tool);
+
+            // Registrar movimiento en kardex
+            registerLoanMovement(loan, client, tool, "Devolución");
+
+            return updateLoan;
+
+        } else {
+            return loanRepository.save(loan);
+        }
     }
 
-    public boolean delete(Long id) {
-        loanRepository.deleteById(id);
-        return true;
+    public boolean delete(Long id) throws Exception {
+        try {
+            Loan loan = loanRepository.findById(id).get();
+            if (loan.isActive()) {
+                Client client = getClient(loan.getClientId());
+                List<LoanData> clientLoans = client.getLoans();
+                deleteLoanData(clientLoans, id);
+                client.setLoans(clientLoans);
+                updateClient(client);
+            }
+            loanRepository.delete(loan);
+            return true;
+        } catch (Exception e) {
+            throw new Exception("Error al eliminar el prestamo: " + e.getMessage(), e);
+        }
     }
 
     private Client getClient(Long clientId) {
@@ -61,9 +133,16 @@ public class LoanService {
         return restTemplate.getForObject("http://tool-service/tools/" + toolId, Tool.class);
     }
 
+    public void putToolInStock(Tool tool){
+        restTemplate.put("http://tool-service/tools/" + tool.getId(), tool);
+    }
+
+    public void updateClient(Client client){
+        restTemplate.put("http://client-service/clients/" + client.getId(), client);
+    }
+
     private Long calculateDaysDiff(String dateLimit, String dateReturn) {
         dateReturn = dateReturn.split("T")[0];
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(dateLimit, formatter);
         LocalDate endDate = LocalDate.parse(dateReturn, formatter);
@@ -106,7 +185,7 @@ public class LoanService {
     }
 
     public List<Loan> getLoansFromClient(Long clientId){
-        return loanRepository.findByClientId(clientId);
+        return loanRepository.findByClientIdAndIsActiveTrue(clientId);
     }
 
     private int calcStock(String toolName){
@@ -115,7 +194,7 @@ public class LoanService {
     }
 
     private boolean isSameTool(Client client, Long toolId) {
-        Tool tool = restTemplate.getForObject("http://tool-service/tools/" + toolId, Tool.class);
+        Tool tool = getTool(toolId);
         for (LoanData loanData : client.getLoans()) {
             Loan loan = loanRepository.findById(loanData.getLoanID()).get();
             if (tool.getName().equals(loan.getToolName()) && (!toolId.equals(loan.getToolId()))) {
@@ -136,19 +215,19 @@ public class LoanService {
             LocalDate start = LocalDate.parse(loan.getDateStart());
             if(now.isAfter(limit)){ // Si el prestamo ha pasado su fecha de límite
                 loan.setDelayed(true); // Se marca como atrasado
-                Client client = restTemplate.getForObject("http://client-service/clients/" + loan.getClientId(), Client.class);
+                Client client = getClient(loan.getClientId());
                 client.setRestricted(true);
                 List<LoanData> clientLoans = client.getLoans();
                 deleteLoanData(clientLoans, loan.getId());
                 LoanData data = createData(loan, "Atrasado");
                 clientLoans.add(data);
                 client.setLoans(clientLoans);
-                restTemplate.put("http://client-service/clients/" + loan.getClientId(), client);
+                updateClient(client);
             } else if (now.isEqual(limit) || (now.isBefore(limit) && now.isAfter(start))) { // Si el prestamo esta en su periodo activo
                 Long actualTotal = loan.getTotalTariff();
                 loan.setTotalTariff(actualTotal + loan.getTariffPerDay()); // Se actualiza la tarifa total
             }
-            restTemplate.put("http://loan-service/loans/" + loan.getId(), loan);
+            loanRepository.save(loan);
         }
     }
 
@@ -176,5 +255,19 @@ public class LoanService {
                 break;
             }
         }
+    }
+
+    private void registerLoanMovement(Loan loan, Client client, Tool tool, String movement){
+        KdRegister newRegister = new KdRegister();
+        newRegister.setToolId(tool.getId());
+        newRegister.setToolName(tool.getName());
+        newRegister.setMovement(movement);
+        newRegister.setTypeRelated(2);
+        LocalDate date = LocalDate.now();
+        newRegister.setDate(date);
+        newRegister.setClientId(client.getId());
+        newRegister.setClientName(client.getName());
+        newRegister.setLoanId(loan.getId());
+        restTemplate.postForObject("http://kardex-service/kdRegisters/", newRegister, Void.class);
     }
 }
