@@ -1,4 +1,10 @@
 spring:
+  application:
+    name: gateway-service
+  cloud:
+    config:
+      enabled: true
+      uri: http://config-server-service:8081
   security:
     oauth2:
       client:

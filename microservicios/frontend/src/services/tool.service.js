@@ -1,39 +1,39 @@
 import httpClient from "../http-common";
 
 const getAll = () => {
-    return httpClient.get('/api/v1/tools/');
+    return httpClient.get('/tools/');
 }
 
 const create = data => {
-    return httpClient.post("/api/v1/tools/", data);
+    return httpClient.post("/tools/", data);
 }
 
 const get = id => {
-    return httpClient.get(`/api/v1/tools/${id}`);
+    return httpClient.get(`/tools/${id}`);
 }
 
 const update = data => {
-    return httpClient.put('/api/v1/tools/', data);
+    return httpClient.put('/tools/', data);
 }
 
 const remove = id => {
-    return httpClient.delete(`/api/v1/tools/${id}`);
+    return httpClient.delete(`/tools/${id}`);
 }
 
 const getTop10 = () => {
-    return httpClient.get('/api/v1/tools/top10');
+    return httpClient.get('/tools/top10');
 }
 
 const getByStatus = status => {
-    return httpClient.get(`/api/v1/tools/status/${status}`);
+    return httpClient.get(`/tools/status/${status}`);
 }
 
 const getByCategory = category => {
-    return httpClient.get(`/api/v1/tools/category/${category}`);
+    return httpClient.get(`/tools/category/${category}`);
 }
 
 const getStock = toolName => {
-    return httpClient.get(`/api/v1/tools/stock/${toolName}`);
+    return httpClient.get(`/tools/stock/${toolName}`);
 }
 
 export default { getAll, create, get, update, remove, getTop10, getByStatus, getByCategory, getStock };

@@ -50,8 +50,9 @@ public class ToolService {
     }
 
     private void downTool(Tool t){
-        if (!t.getHistory().isEmpty()){
-            Long lastId = t.getHistory().getLast().getLoanID();
+        List<LoanData> history = t.getHistory();
+        if (!history.isEmpty()){
+            Long lastId = history.get(history.size() - 1).getLoanID();
             Loan loan = restTemplate.getForObject("http://loan-service/loans/" + lastId, Loan.class);
             Client client = restTemplate.getForObject("http://client-service/clients/" + loan.getClientId(), Client.class);
             client.setFine(client.getFine() + t.getPrice());

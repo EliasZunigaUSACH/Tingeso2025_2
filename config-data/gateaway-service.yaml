@@ -31,27 +31,33 @@ spring:
             - Path=/client/**
           filters:
             - StripPrefix=1
-        - id : reservation-service
-          uri: lb://reservation-service
+        - id : tool-service
+          uri: lb://tool-service
           predicates:
-            - Path=/reservation/**
+            - Path=/tool/**
           filters:
             - StripPrefix=1
-        - id: rack-service
-          uri: lb://rack-service
+        - id: kardex-service
+          uri: lb://kardex-service
           predicates:
-            - Path=/rack/**
+            - Path=/kardex/**
           filters:
             - StripPrefix=1
-        - id: receipt-service
-          uri: lb://receipt-service
+        - id: loan-service
+          uri: lb://loan-service
           predicates:
-            - Path=/receipt/**
+            - Path=/loan/**
           filters:
             - StripPrefix=1
         - id: report-service
           uri: lb://report-service
           predicates:
             - Path=/report/**
+          filters:
+            - StripPrefix=1
+        - id: tariff-service
+          uri: lb://tariff-service
+          predicates:
+            - Path=/tariff/**
           filters:
             - StripPrefix=1

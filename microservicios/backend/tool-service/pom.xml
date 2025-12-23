@@ -11,7 +11,7 @@
 	<groupId>com.tutorial</groupId>
 	<artifactId>tool-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>client-service</name>
+	<name>tool-service</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
@@ -102,7 +102,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>client-service</finalName>
+		<finalName>tool-service</finalName>
 	</build>
 
 </project>
