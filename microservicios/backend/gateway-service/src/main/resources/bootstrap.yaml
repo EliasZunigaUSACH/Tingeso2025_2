@@ -10,7 +10,7 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://keycloak-server:9090/realms/toolrent-realm
+            issuer-uri: http://localhost:9090/realms/toolrent-realm
         registration:
           toolrent-client:
             provider: keycloak
@@ -18,4 +18,4 @@ spring:
             client-secret: WEbwpPNAoFEcaCQfAH235xt26Q1xFZBa
             scope: openid,profile,email
             authorization-grant-type: authorization_code
-            redirect-uri: "http://keycloak-server:8080/login/oauth2/code/keycloak"
+            redirect-uri: "http://localhost:8080/login/oauth2/code/keycloak"

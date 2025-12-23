@@ -2,78 +2,29 @@ package com.example.gateway_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
-import java.util.*;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
+@EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityConfig {
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173/"
-        ));
-
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // 1 hora
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
-                // 1. PRIMERO CORS (más prioritario)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // 2. LUEGO CSRF
-                .csrf(csrf -> csrf.disable())
-
-                // 3. CONFIGURACIÓN DE AUTORIZACIÓN
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/").permitAll() // ← IMPORTANTE
-                        .requestMatchers("/public/").permitAll()
-                        .requestMatchers("/**").authenticated()
-                        .anyRequest().authenticated()
+                .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF para APIs si es necesario
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/public/**").permitAll() // Rutas públicas
+                        .anyExchange().authenticated() // El resto requiere autenticación
                 )
-
-                // 4. OAUTH2 RESOURCE SERVER
-                .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(jwtAuthConverter())
-                        )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(withDefaults())
                 );
-
         return http.build();
-    }
-
-    private JwtAuthenticationConverter jwtAuthConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            Collection<GrantedAuthority> authorities = new ArrayList<>();
-            Map<String, Object> realmAccess = (Map<String, Object>) jwt.getClaims().get("realm_access");
-
-            if (realmAccess != null && realmAccess.get("roles") instanceof List<?>) {
-                List<?> roles = (List<?>) realmAccess.get("roles");
-                roles.forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
-            }
-
-            return authorities;
-        });
-        return converter;
     }
 }
