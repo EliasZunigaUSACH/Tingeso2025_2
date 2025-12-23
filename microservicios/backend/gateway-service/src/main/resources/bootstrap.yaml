@@ -1,7 +1,15 @@
 spring:
-  application:
-    name: gateway-service
-  cloud:
-    config:
-      enabled: true
-      uri: http://localhost:8081/
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak-server:9090/realms/toolrent-realm
+        registration:
+          toolrent-client:
+            provider: keycloak
+            client-id: toolrent-backend
+            client-secret: WEbwpPNAoFEcaCQfAH235xt26Q1xFZBa
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://keycloak-server:8090/login/oauth2/code/keycloak"
