@@ -18,4 +18,4 @@ spring:
             client-secret: WEbwpPNAoFEcaCQfAH235xt26Q1xFZBa
             scope: openid,profile,email
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8080/login/oauth2/code/keycloak"
+            redirect-uri: "http://localhost:8090/login/oauth2/code/keycloak"
