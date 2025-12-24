@@ -29,13 +29,13 @@ spring:
         - id: client-service
           uri: lb://client-service
           predicates:
-            - Path=/client/**
+            - Path=/clients/**
           filters:
             - StripPrefix=1
         - id : tool-service
           uri: lb://tool-service
           predicates:
-            - Path=/tool/**
+            - Path=/tools/**
           filters:
             - StripPrefix=1
         - id: kardex-service
@@ -47,13 +47,13 @@ spring:
         - id: loan-service
           uri: lb://loan-service
           predicates:
-            - Path=/loan/**
+            - Path=/loans/**
           filters:
             - StripPrefix=1
         - id: report-service
           uri: lb://report-service
           predicates:
-            - Path=/report/**
+            - Path=/reports/**
           filters:
             - StripPrefix=1
         - id: tariff-service
