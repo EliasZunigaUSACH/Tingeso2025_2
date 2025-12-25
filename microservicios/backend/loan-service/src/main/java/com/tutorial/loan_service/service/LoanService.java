@@ -8,6 +8,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +30,21 @@ public class LoanService {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+                request.getHeaders().setBearerAuth(jwtAuthenticationToken.getToken().getTokenValue());
+            }
+            return execution.execute(request, body);
+        });
+        this.restTemplate = restTemplate;
+    }
+
+    String tool_url = "http://tool-service/api/tools/";
+    String client_url = "http://client-service/api/clients/";
+
     public List<Loan> getAll() {
         return loanRepository.findAll();
     }
@@ -41,7 +59,7 @@ public class LoanService {
         checkClientAndTool(client, tool);
         loan.setToolName(tool.getName());
 
-        Tariff tariff = restTemplate.getForObject("http://tariff-service/tariff/", Tariff.class);
+        Tariff tariff = restTemplate.getForObject("http://tariff-service/api/tariff/", Tariff.class);
         loan.setTariffPerDay(tariff.getDailyTariff());
         loan.setTotalTariff(0L);
         loan.setDelayTariff(tariff.getDelayTariff());
@@ -126,19 +144,19 @@ public class LoanService {
     }
 
     private Client getClient(Long clientId) {
-        return restTemplate.getForObject("http://client-service/clients/" + clientId, Client.class);
+        return restTemplate.getForObject(client_url + clientId, Client.class);
     }
 
     private Tool getTool(Long toolId) {
-        return restTemplate.getForObject("http://tool-service/tools/" + toolId, Tool.class);
+        return restTemplate.getForObject(tool_url + toolId, Tool.class);
     }
 
     public void putToolInStock(Tool tool){
-        restTemplate.put("http://tool-service/tools/" + tool.getId(), tool);
+        restTemplate.put(tool_url + tool.getId(), tool);
     }
 
     public void updateClient(Client client){
-        restTemplate.put("http://client-service/clients/" + client.getId(), client);
+        restTemplate.put(client_url + client.getId(), client);
     }
 
     private Long calculateDaysDiff(String dateLimit, String dateReturn) {
@@ -189,7 +207,7 @@ public class LoanService {
     }
 
     private int calcStock(String toolName){
-        List<Tool> toolStock = restTemplate.getForObject("http://tool-service/tools/" + toolName, List.class);
+        List<Tool> toolStock = restTemplate.getForObject(tool_url + toolName, List.class);
         return toolStock.size();
     }
 
@@ -268,6 +286,6 @@ public class LoanService {
         newRegister.setClientId(client.getId());
         newRegister.setClientName(client.getName());
         newRegister.setLoanId(loan.getId());
-        restTemplate.postForObject("http://kardex-service/kdRegisters/", newRegister, Void.class);
+        restTemplate.postForObject("http://kardex-service/api/kardex/", newRegister, Void.class);
     }
 }

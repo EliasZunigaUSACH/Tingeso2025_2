@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/kdRegisters")
+@RequestMapping("/api/kardex")
 @CrossOrigin("*")
 public class KdRegisterController {
 
@@ -18,7 +18,7 @@ public class KdRegisterController {
     KdRegisterService kdRegisterService;
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<KdRegister>> getAll() {
         List<KdRegister> kdRegisters = kdRegisterService.getAll();
         if(kdRegisters.isEmpty())
@@ -26,7 +26,7 @@ public class KdRegisterController {
         return ResponseEntity.ok(kdRegisters);
     }
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<KdRegister> create(@RequestBody KdRegister kdRegister) {
         KdRegister newRegister = kdRegisterService.save(kdRegister);
         return ResponseEntity.ok(newRegister);

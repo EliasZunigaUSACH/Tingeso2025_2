@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/tariff")
+@RequestMapping("/api/tariff")
 @CrossOrigin("*")
 public class TariffController {
 

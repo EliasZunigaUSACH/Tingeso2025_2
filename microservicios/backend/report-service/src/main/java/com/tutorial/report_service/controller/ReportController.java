@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/reports")
+@RequestMapping("/api/reports")
 @CrossOrigin("*")
 public class ReportController {
 
@@ -18,7 +18,7 @@ public class ReportController {
     ReportService reportService;
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<Report>> getAll() {
         List<Report> reports = reportService.getAll();
         if(reports.isEmpty())
@@ -36,7 +36,7 @@ public class ReportController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Report> save(@RequestBody Report report) {
         Report reportNew = reportService.save(report);
         return ResponseEntity.ok(reportNew);

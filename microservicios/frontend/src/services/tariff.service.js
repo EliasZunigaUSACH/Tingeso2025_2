@@ -1,15 +1,15 @@
 import HttpClient from "../http-common";
 
 const get = () => {
-    return HttpClient.get('/api/v1/tariff/');
+    return HttpClient.get('/api/tariff/');
 }
 
 const create = (data) => {
-    return HttpClient.post("/api/v1/tariff/", data);
+    return HttpClient.post("/api/tariff/", data);
 }
 
 const update = (data) => {
-    return HttpClient.put('/api/v1/tariff/', data);
+    return HttpClient.put('/api/tariff/', data);
 }
 
 export default { get, create, update };

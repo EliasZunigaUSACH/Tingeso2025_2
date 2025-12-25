@@ -28,29 +28,7 @@ const AddTool = () => {
             .create(tool)
             .then((response) => {
                 console.log("Herramienta ha sido añadida.", response.data);
-                // Crear registro en el kardex
-                const kardexRegister = {
-                    toolId: response.data.id || response.data._id, // Ajustar según backend
-                    movement: "Registro nueva herramienta",
-                    clientId: null,
-                    clientName: "No aplica",
-                    date: new Date().toISOString(),
-                    toolName: response.data.name,
-                    typeRelated: 1 // 1: Herramienta
-                };
-                // Importar el servicio de kardexRegister
-                import("../services/kardexRegister.service.js").then((kardexServiceModule) => {
-                    const kardexService = kardexServiceModule.default;
-                    kardexService.create(kardexRegister)
-                        .then(() => {
-                            console.log("Registro de kardex creado.");
-                            navigate("/tool/list");
-                        })
-                        .catch((error) => {
-                            console.log("Error al crear registro en kardex.", error);
-                            navigate("/tool/list");
-                        });
-                });
+                navigate("/tool/list");
             })
             .catch((error) => {
                 console.log("Ha ocurrido un error al intentar crear nueva herramienta.", error);

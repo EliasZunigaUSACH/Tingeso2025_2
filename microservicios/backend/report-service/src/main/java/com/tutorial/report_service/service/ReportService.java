@@ -27,12 +27,16 @@ public class ReportService {
         return reportRepository.findById(id).get();
     }
 
+    String loan_url = "http://loan-service/api/loans/";
+    String client_url = "http://client-service/api/clients/";
+    String tool_url = "http://tool-service/api/tools/";
+
     public Report save(Report report) {
         List<Loan> actives, delayed;
-        List<Tool> topTools = restTemplate.getForObject("http://tool-service/tools/top", List.class);
+        List<Tool> topTools = restTemplate.getForObject( tool_url + "top10", List.class);
         List<String> top10String = getTopString(topTools);
-        actives = restTemplate.getForObject("http://loan-service/loans/active", List.class);
-        delayed = restTemplate.getForObject("http://loan-service/loans/delayed", List.class);
+        actives = restTemplate.getForObject( loan_url + "active", List.class);
+        delayed = restTemplate.getForObject( loan_url + "delayed", List.class);
         report.setActiveLoans(trasnferToData(actives));
         report.setDelayedLoans(trasnferToData(delayed));
         report.setClientsWithDelayedLoans(getClientsWithDelayedLoansCall());
@@ -83,7 +87,7 @@ public class ReportService {
     }
 
     private List<String> getClientsWithDelayedLoansCall(){
-        List<Client> clients = restTemplate.getForObject("http://client-service/clients/withActiveDelayedLoans", List.class);
+        List<Client> clients = restTemplate.getForObject(client_url + "withActiveDelayedLoans", List.class);
         List<String> clientsNames = new ArrayList<>();
         for (Client client : clients) {
             int delayedCount = countDelayedLoans(client);

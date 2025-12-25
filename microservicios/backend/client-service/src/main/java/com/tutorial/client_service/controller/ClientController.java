@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/clients")
+@RequestMapping("/api/clients")
 @CrossOrigin("*")
 public class ClientController {
 
@@ -18,7 +18,7 @@ public class ClientController {
     ClientService clientService;
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<Client>> getAll() {
         List<Client> clients = clientService.getAll();
         if(clients.isEmpty())
@@ -36,14 +36,14 @@ public class ClientController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Client> save(@RequestBody Client client) {
         Client clientNew = clientService.save(client);
         return ResponseEntity.ok(clientNew);
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PutMapping
+    @PutMapping("/")
     public ResponseEntity<Client> update(@RequestBody Client client) {
         Client clientNew = clientService.updateClient(client);
         return ResponseEntity.ok(clientNew);

@@ -18,6 +18,3 @@ spring:
             scope: openid,profile,email
             authorization-grant-type: authorization_code
             redirect-uri: http://localhost:8090/login/oauth2/code/keycloak
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:9090/realms/toolrent-realm

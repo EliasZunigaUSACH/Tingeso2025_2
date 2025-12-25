@@ -35,14 +35,14 @@ public class ToolController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Tool> save(@RequestBody Tool tool) {
         Tool toolNew = toolService.save(tool);
         return ResponseEntity.ok(toolNew);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping
+    @PutMapping("/")
     public ResponseEntity<Tool> update(@RequestBody Tool tool) {
         Tool toolNew = toolService.update(tool);
         return ResponseEntity.ok(toolNew);

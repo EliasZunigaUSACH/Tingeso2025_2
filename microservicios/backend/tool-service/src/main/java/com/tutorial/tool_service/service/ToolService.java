@@ -4,6 +4,13 @@ import com.tutorial.tool_service.entity.Tool;
 import com.tutorial.tool_service.model.*;
 import com.tutorial.tool_service.repository.ToolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,6 +26,22 @@ public class ToolService {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+                request.getHeaders().setBearerAuth(jwtAuthenticationToken.getToken().getTokenValue());
+            }
+            return execution.execute(request, body);
+        });
+        this.restTemplate = restTemplate;
+    }
+
+    String kardex_url = "http://kardex-service/api/kardex/";
+    String loan_url = "http://loan-service/api/loans/";
+    String client_url = "http://client-service/api/clients/";
 
     public List<Tool> getAll() {
         return toolRepository.findAll();
@@ -39,7 +62,7 @@ public class ToolService {
         Tool oldTool = toolRepository.findById(tool.getId()).get();
         Tool savedTool = toolRepository.save(tool);
         if (savedTool.getStatus() == 0) downTool(oldTool);
-        else if ((savedTool.getStatus() == 3) && (oldTool.getStatus() == 2)) registerToolMovement(oldTool, "Alta de herramienta");
+        else if ((savedTool.getStatus() == 3) && (oldTool.getStatus() == 2)) registerToolMovement(savedTool, "Alta de herramienta");
         else registerToolMovement(savedTool, "Actualización de herramienta");
         return savedTool;
     }
@@ -53,11 +76,11 @@ public class ToolService {
         List<LoanData> history = t.getHistory();
         if (!history.isEmpty()){
             Long lastId = history.get(history.size() - 1).getLoanID();
-            Loan loan = restTemplate.getForObject("http://loan-service/loans/" + lastId, Loan.class);
-            Client client = restTemplate.getForObject("http://client-service/clients/" + loan.getClientId(), Client.class);
+            Loan loan = restTemplate.getForObject(loan_url + lastId, Loan.class);
+            Client client = restTemplate.getForObject(client_url + loan.getClientId(), Client.class);
             client.setFine(client.getFine() + t.getPrice());
             client.setRestricted(true);
-            restTemplate.put("http://client-service/clients/" + loan.getClientId(), client);
+            restTemplate.put(client_url + loan.getClientId(), client);
         }
         registerToolMovement(t, "Baja de herramienta");
     }
@@ -85,7 +108,7 @@ public class ToolService {
         newRegister.setClientId(null);
         newRegister.setClientName(null);
         newRegister.setLoanId(null);
-        restTemplate.postForObject("http://kd-service/kdRegisters", newRegister, Void.class);
+        restTemplate.postForObject(kardex_url, newRegister, Void.class);
     }
 
     public List<Tool> getStockTools(String Name){

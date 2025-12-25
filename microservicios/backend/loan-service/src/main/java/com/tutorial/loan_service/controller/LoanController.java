@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tools")
+@RequestMapping("/api/loans")
 @CrossOrigin("*")
 public class LoanController {
 
@@ -36,14 +36,14 @@ public class LoanController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Loan> save(@RequestBody Loan loan) {
         Loan loanNew = loanService.save(loan);
         return ResponseEntity.ok(loanNew);
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PutMapping
+    @PutMapping("/")
     public ResponseEntity<Loan> update(@RequestBody Loan loan) {
         Loan loanNew = loanService.update(loan);
         return ResponseEntity.ok(loanNew);
