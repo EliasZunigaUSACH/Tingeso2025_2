@@ -27,31 +27,31 @@ spring:
             allow-credentials: true
       routes:
         - id: client-service
-          uri: lb://client-service
+          uri: lb://CLIENT-SERVICE
           predicates:
             - Path=/clients/**
 
         - id : tool-service
-          uri: lb://tool-service
+          uri: lb://TOOL-SERVICE
           predicates:
             - Path=/api/tools/**
 
         - id: kardex-service
-          uri: lb://kardex-service
+          uri: lb://KARDEX-SERVICE
           predicates:
             - Path=/api/kardex/**
 
         - id: loan-service
-          uri: lb://loan-service
+          uri: lb://LOAN-SERVICE
           predicates:
             - Path=/api/loans/**
 
         - id: report-service
-          uri: lb://report-service
+          uri: lb://REPORT-SERVICE
           predicates:
             - Path=/api/reports/**
 
         - id: tariff-service
-          uri: lb://tariff-service
+          uri: lb://TARIFF-SERVICE
           predicates:
             - Path=/api/tariff/**
