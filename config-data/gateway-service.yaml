@@ -30,35 +30,28 @@ spring:
           uri: lb://client-service
           predicates:
             - Path=/clients/**
-          filters:
-            - StripPrefix=1
+
         - id : tool-service
           uri: lb://tool-service
           predicates:
-            - Path=/tools/**
-          filters:
-            - StripPrefix=1
+            - Path=/api/tools/**
+
         - id: kardex-service
           uri: lb://kardex-service
           predicates:
-            - Path=/kardex/**
-          filters:
-            - StripPrefix=1
+            - Path=/api/kardex/**
+
         - id: loan-service
           uri: lb://loan-service
           predicates:
-            - Path=/loans/**
-          filters:
-            - StripPrefix=1
+            - Path=/api/loans/**
+
         - id: report-service
           uri: lb://report-service
           predicates:
-            - Path=/reports/**
-          filters:
-            - StripPrefix=1
+            - Path=/api/reports/**
+
         - id: tariff-service
           uri: lb://tariff-service
           predicates:
-            - Path=/tariff/**
-          filters:
-            - StripPrefix=1
+            - Path=/api/tariff/**
