@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/kardex")
-@CrossOrigin("*")
 public class KdRegisterController {
 
     @Autowired

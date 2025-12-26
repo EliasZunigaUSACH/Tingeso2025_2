@@ -29,7 +29,7 @@ spring:
         - id: client-service
           uri: lb://CLIENT-SERVICE
           predicates:
-            - Path=/clients/**
+            - Path=/api/clients/**
 
         - id : tool-service
           uri: lb://TOOL-SERVICE
