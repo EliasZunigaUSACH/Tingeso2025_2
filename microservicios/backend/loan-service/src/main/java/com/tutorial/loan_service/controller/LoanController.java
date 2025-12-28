@@ -42,7 +42,7 @@ public class LoanController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PutMapping("/")
+    @PutMapping("/update")
     public ResponseEntity<Loan> update(@RequestBody Loan loan) {
         Loan loanNew = loanService.update(loan);
         return ResponseEntity.ok(loanNew);

@@ -13,7 +13,7 @@ const get = id => {
 }
 
 const update = data => {
-    return httpClient.put('/api/loans/', data); 
+    return httpClient.put('/api/loans/update', data); 
 }
 
 const remove = id => {

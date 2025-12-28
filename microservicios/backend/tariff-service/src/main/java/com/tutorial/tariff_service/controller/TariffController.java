@@ -22,7 +22,7 @@ public class TariffController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/")
+    @PutMapping("/update")
     public ResponseEntity<Tariff> updateTariff(@RequestBody Tariff tariff){
         Tariff updatedTariff = tariffService.updateTariff(tariff);
         return ResponseEntity.ok(updatedTariff);

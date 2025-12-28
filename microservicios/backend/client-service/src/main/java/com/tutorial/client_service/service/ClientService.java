@@ -23,18 +23,6 @@ public class ClientService {
     @Autowired
     RestTemplate restTemplate;
 
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        restTemplate.getInterceptors().add((request, body, execution) -> {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
-                request.getHeaders().setBearerAuth(jwtAuthenticationToken.getToken().getTokenValue());
-            }
-            return execution.execute(request, body);
-        });
-        this.restTemplate = restTemplate;
-    }
-
     public List<Client> getAll() {
         return clientRepository.findAll();
     }

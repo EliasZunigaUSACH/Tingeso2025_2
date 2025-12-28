@@ -39,10 +39,6 @@ public class ToolService {
         this.restTemplate = restTemplate;
     }
 
-    String kardex_url = "http://kardex-service/api/kardex/";
-    String loan_url = "http://loan-service/api/loans/";
-    String client_url = "http://client-service/api/clients/";
-
     public List<Tool> getAll() {
         return toolRepository.findAll();
     }
@@ -54,8 +50,9 @@ public class ToolService {
     public Tool save(Tool tool) {
         ArrayList<LoanData> Loans = new ArrayList<>();
         tool.setHistory(Loans);
-        registerToolMovement(tool, "Registro de herramienta");
-        return toolRepository.save(tool);
+        Tool savedTool = toolRepository.save(tool);
+        registerToolMovement(savedTool, "Registro de herramienta");
+        return savedTool;
     }
 
     public Tool update(Tool tool) {
@@ -76,11 +73,11 @@ public class ToolService {
         List<LoanData> history = t.getHistory();
         if (!history.isEmpty()){
             Long lastId = history.get(history.size() - 1).getLoanID();
-            Loan loan = restTemplate.getForObject(loan_url + lastId, Loan.class);
-            Client client = restTemplate.getForObject(client_url + loan.getClientId(), Client.class);
+            Loan loan = restTemplate.getForObject("http://loan-service/api/loans/" + lastId, Loan.class);
+            Client client = restTemplate.getForObject("http://client-service/api/clients/"+ loan.getClientId(), Client.class);
             client.setFine(client.getFine() + t.getPrice());
             client.setRestricted(true);
-            restTemplate.put(client_url + loan.getClientId(), client);
+            restTemplate.put("http://client-service/api/clients/update", client);
         }
         registerToolMovement(t, "Baja de herramienta");
     }
@@ -108,7 +105,7 @@ public class ToolService {
         newRegister.setClientId(null);
         newRegister.setClientName(null);
         newRegister.setLoanId(null);
-        restTemplate.postForObject(kardex_url, newRegister, Void.class);
+        restTemplate.postForObject("http://kardex-service/api/kardex/", newRegister, Void.class);
     }
 
     public List<Tool> getStockTools(String Name){

@@ -42,9 +42,6 @@ public class LoanService {
         this.restTemplate = restTemplate;
     }
 
-    String tool_url = "http://tool-service/api/tools/";
-    String client_url = "http://client-service/api/clients/";
-
     public List<Loan> getAll() {
         return loanRepository.findAll();
     }
@@ -79,7 +76,7 @@ public class LoanService {
         String nowString = now.toString().split("T")[0];
         if (nowString.equals(savedLoan.getDateStart())) {
             tool.setStatus(2);
-            putToolInStock(tool);
+            updateTool(tool);
         }
 
         registerLoanMovement(savedLoan, client, tool, "Prestamo");
@@ -114,7 +111,7 @@ public class LoanService {
             tool.setHistory(toolHistory);
             if (updateLoan.isToolGotDamaged()) tool.setStatus(1);
             else tool.setStatus(3);
-            putToolInStock(tool);
+            updateTool(tool);
 
             // Registrar movimiento en kardex
             registerLoanMovement(loan, client, tool, "Devolución");
@@ -144,19 +141,19 @@ public class LoanService {
     }
 
     private Client getClient(Long clientId) {
-        return restTemplate.getForObject(client_url + clientId, Client.class);
+        return restTemplate.getForObject("http://client-service/api/clients/" + clientId, Client.class);
     }
 
     private Tool getTool(Long toolId) {
-        return restTemplate.getForObject(tool_url + toolId, Tool.class);
+        return restTemplate.getForObject("http://tool-service/api/tools/" + toolId, Tool.class);
     }
 
-    public void putToolInStock(Tool tool){
-        restTemplate.put(tool_url + tool.getId(), tool);
+    public void updateTool(Tool tool){
+        restTemplate.put("http://tool-service/api/tools/update", tool);
     }
 
     public void updateClient(Client client){
-        restTemplate.put(client_url + client.getId(), client);
+        restTemplate.put("http://client-service/api/clients/update", client);
     }
 
     private Long calculateDaysDiff(String dateLimit, String dateReturn) {
@@ -207,8 +204,9 @@ public class LoanService {
     }
 
     private int calcStock(String toolName){
-        List<Tool> toolStock = restTemplate.getForObject(tool_url + toolName, List.class);
-        return toolStock.size();
+        List<Tool> toolStock = restTemplate.getForObject("http://tool-service/api/tools/name/" + toolName, List.class);
+        if (toolStock != null) return toolStock.size();
+        else return 0;
     }
 
     private boolean isSameTool(Client client, Long toolId) {

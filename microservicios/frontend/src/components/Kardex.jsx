@@ -104,13 +104,10 @@ const Kardex = () => {
 	};
 
 	const getDateFormatted = (date) => {
-    if (!date) return "-";
-    const parsedDate = date.toString();
-    return parsedDate;
-}
-	const getToolName = (toolId) => {
-		return tools[toolId]?.name || "-";
-	};
+		if (!date) return "-";
+		const parsedDate = date.toString();
+		return parsedDate;
+	}
 
 	const getClientName = (clientId) => {
 		return clients[clientId]?.name || "No aplica";
@@ -222,7 +219,7 @@ const Kardex = () => {
 													<TableCell>{row.movement || '-'}</TableCell>
 													<TableCell>{getDateFormatted(row.date)}</TableCell>
 													<TableCell>{getRelacionLabel(row.typeRelated)}</TableCell>
-													<TableCell>{getToolName(row.toolId)}</TableCell>
+													<TableCell>{row.toolName}</TableCell>
 													<TableCell>{row.toolId || 'No aplica'}</TableCell>
 													<TableCell>{row.loanId || 'No aplica'}</TableCell>
 													<TableCell>{getClientName(row.clientId)}</TableCell>

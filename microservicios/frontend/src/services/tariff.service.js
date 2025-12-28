@@ -9,7 +9,7 @@ const create = (data) => {
 }
 
 const update = (data) => {
-    return HttpClient.put('/api/tariff/', data);
+    return HttpClient.put('/api/tariff/update', data);
 }
 
 export default { get, create, update };

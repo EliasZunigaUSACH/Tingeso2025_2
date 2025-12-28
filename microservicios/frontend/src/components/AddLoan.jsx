@@ -94,7 +94,8 @@ const AddLoan = () => {
       setErrorMessage("Las fechas seleccionadas no son válidas.");
       return;
     }
-    const loan = { 
+    const loan = {
+      toolName, 
       toolId, 
       clientId, 
       clientName, 

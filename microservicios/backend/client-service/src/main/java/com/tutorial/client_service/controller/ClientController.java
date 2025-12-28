@@ -20,8 +20,6 @@ public class ClientController {
     @GetMapping("/")
     public ResponseEntity<List<Client>> getAll() {
         List<Client> clients = clientService.getAll();
-        if(clients.isEmpty())
-            return ResponseEntity.noContent().build();
         return ResponseEntity.ok(clients);
     }
 
@@ -29,8 +27,6 @@ public class ClientController {
     @GetMapping("/{id}")
     public ResponseEntity<Client> getById(@PathVariable Long id) {
         Client client = clientService.getClientById(id);
-        if(client == null)
-            return ResponseEntity.notFound().build();
         return ResponseEntity.ok(client);
     }
 
@@ -42,7 +38,7 @@ public class ClientController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PutMapping("/")
+    @PutMapping("/update")
     public ResponseEntity<Client> update(@RequestBody Client client) {
         Client clientNew = clientService.updateClient(client);
         return ResponseEntity.ok(clientNew);

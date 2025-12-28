@@ -42,7 +42,7 @@ public class ToolController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/")
+    @PutMapping("/update")
     public ResponseEntity<Tool> update(@RequestBody Tool tool) {
         Tool toolNew = toolService.update(tool);
         return ResponseEntity.ok(toolNew);
@@ -61,7 +61,7 @@ public class ToolController {
         return ResponseEntity.ok(top10);
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/name/{name}")
     public ResponseEntity<List<Tool>> getToolByName(@PathVariable String name){
         List<Tool> stock = toolService.getStockTools(name);
         return ResponseEntity.ok(stock);
