@@ -192,11 +192,11 @@ public class LoanService {
     }
 
     public List<Loan> getActiveLoans() {
-        return loanRepository.findByIsActiveTrueAndIsDelayedTrue();
+        return loanRepository.findByIsActiveTrueAndIsDelayedFalse();
     }
 
     public List<Loan> getDelayedLoans() {
-        return loanRepository.findByIsActiveTrueAndIsDelayedFalse();
+        return loanRepository.findByIsActiveTrueAndIsDelayedTrue();
     }
 
     public List<Loan> getLoansFromClient(Long clientId){
