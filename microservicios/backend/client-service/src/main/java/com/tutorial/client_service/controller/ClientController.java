@@ -51,7 +51,7 @@ public class ClientController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/withActiveDelayedLoans")
+    @GetMapping("/search/withActiveDelayedLoans")
     public ResponseEntity<List<Client>> getWithActiveDelayedLoans(){
         List<Client> clients = clientService.getClientsWithDelayedLoans();
         return ResponseEntity.ok(clients);

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -22,6 +23,18 @@ public class ClientService {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+                request.getHeaders().setBearerAuth(jwtAuthenticationToken.getToken().getTokenValue());
+            }
+            return execution.execute(request, body);
+        });
+        this.restTemplate = restTemplate;
+    }
 
     public List<Client> getAll() {
         return clientRepository.findAll();
@@ -52,14 +65,13 @@ public class ClientService {
 
     public List<Client> getClientsWithDelayedLoans(){
         List<Client> clients = clientRepository.findByLoansNotEmpty();
-        for (Client client : clients) {
-            int delayedCount = countDelayedLoans(client);
-            if (delayedCount == 0) clients.remove(client);
-        }
-        return clients;
+        clients.removeIf(client -> !detectDelayedLoans(client));
+        if (clients.isEmpty()) return new ArrayList<>();
+        else return clients;
     }
 
     private boolean detectDelayedLoans(Client client) {
+        if (client.getLoans().isEmpty()) return false;
         Long clientID = client.getId();
         List<Loan> clientLoans = getActiveLoansFromClient(clientID);
         for (Loan loan : clientLoans) {
@@ -70,23 +82,8 @@ public class ClientService {
         return false;
     }
 
-    private int countDelayedLoans(Client client) {
-        List<LoanData> dataList = client.getLoans();
-        int count = 0;
-        for (LoanData loanData : dataList) {
-            Loan loan = getLoan(loanData.getLoanID());
-            if (loan.isDelayed()) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public Loan getLoan(Long id){
-        return restTemplate.getForObject("http://loan-service/loans/" + id, Loan.class);
-    }
-
     public List<Loan> getActiveLoansFromClient(Long clientID){
-        return restTemplate.getForObject("http://loan-service/loans/activesForClient/" + clientID, List.class);
+        Loan[] loansArray = restTemplate.getForObject("http://loan-service/api/loans/activesForClient/" + clientID, Loan[].class);
+        return Arrays.asList(loansArray);
     }
 }

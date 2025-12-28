@@ -176,7 +176,7 @@ public class LoanService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El cliente " + client.getName() + " tiene 5 prestamos vigentes.");
         } else if (isSameTool(client, tool.getId())) { // Cliente ya tiene esta herramienta prestada
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El cliente " + client.getName() + " ya tiene prestada esta herramienta.");
-        } else if (calcStock(tool.getName()) > 0) {
+        } else if (calcStock(tool.getName()) == 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay stock disponible de la herramienta " + tool.getName() + ".");
         }
         switch(tool.getStatus()) {

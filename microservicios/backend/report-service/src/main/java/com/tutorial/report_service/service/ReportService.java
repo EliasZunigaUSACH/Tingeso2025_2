@@ -4,6 +4,9 @@ import com.tutorial.report_service.entity.Report;
 import com.tutorial.report_service.model.*;
 import com.tutorial.report_service.repository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,6 +22,18 @@ public class ReportService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+                request.getHeaders().setBearerAuth(jwtAuthenticationToken.getToken().getTokenValue());
+            }
+            return execution.execute(request, body);
+        });
+        this.restTemplate = restTemplate;
+    }
+
     public List<Report> getAll() {
         return reportRepository.findAll();
     }
@@ -32,15 +47,17 @@ public class ReportService {
     String tool_url = "http://tool-service/api/tools/";
 
     public Report save(Report report) {
-        List<Loan> actives, delayed;
-        List<Tool> topTools = restTemplate.getForObject( tool_url + "top10", List.class);
-        List<String> top10String = getTopString(topTools);
-        actives = restTemplate.getForObject( loan_url + "active", List.class);
-        delayed = restTemplate.getForObject( loan_url + "delayed", List.class);
-        report.setActiveLoans(trasnferToData(actives));
-        report.setDelayedLoans(trasnferToData(delayed));
+        Loan[] activesArray, delayedArray;
+        Tool[] toolsArray = restTemplate.getForObject( tool_url + "top10", Tool[].class);
+        activesArray = restTemplate.getForObject( loan_url + "/search/actives", Loan[].class);
+        delayedArray = restTemplate.getForObject( loan_url + "/search/delayed", Loan[].class);
+        if (toolsArray == null) report.setTopTools(new ArrayList<>());
+        else report.setTopTools(getTopString(Arrays.asList(toolsArray)));
+        if (activesArray == null) report.setActiveLoans(new ArrayList<>());
+        else report.setActiveLoans(trasnferToData(Arrays.asList(activesArray)));
+        if (delayedArray == null) report.setDelayedLoans(new ArrayList<>());
+        else report.setDelayedLoans(trasnferToData(Arrays.asList(delayedArray)));
         report.setClientsWithDelayedLoans(getClientsWithDelayedLoansCall());
-        report.setTopTools(top10String);
         return reportRepository.save(report);
     }
 
@@ -68,6 +85,7 @@ public class ReportService {
         List<LoanData> loanDataList = new ArrayList<>();
         for (Loan loan : loans) {
             LoanData loanData = new LoanData();
+            loanData.setLoanID(loan.getId());
             loanData.setClientName(loan.getClientName());
             loanData.setToolName(loan.getToolName());
             loanData.setLoanDate(loan.getDateStart());
@@ -87,7 +105,9 @@ public class ReportService {
     }
 
     private List<String> getClientsWithDelayedLoansCall(){
-        List<Client> clients = restTemplate.getForObject(client_url + "withActiveDelayedLoans", List.class);
+        Client[] clientsArray = restTemplate.getForObject(client_url + "/search/withActiveDelayedLoans", Client[].class);
+        if (clientsArray == null) return new ArrayList<>();
+        List<Client> clients = Arrays.asList(clientsArray);
         List<String> clientsNames = new ArrayList<>();
         for (Client client : clients) {
             int delayedCount = countDelayedLoans(client);

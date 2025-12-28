@@ -55,13 +55,13 @@ public class LoanController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/actives")
+    @GetMapping("/search/actives")
     public ResponseEntity<List<Loan>> getActiveLoans() {
         List<Loan> loans = loanService.getActiveLoans();
         return ResponseEntity.ok(loans);
     }
 
-    @GetMapping("/delayed")
+    @GetMapping("/search/delayed")
     public ResponseEntity<List<Loan>> getDelayedLoans() {
         List<Loan> loans = loanService.getDelayedLoans();
         return ResponseEntity.ok(loans);
