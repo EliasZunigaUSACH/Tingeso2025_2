@@ -58,9 +58,9 @@ public class ToolService {
     public Tool update(Tool tool) {
         Tool oldTool = toolRepository.findById(tool.getId()).get();
         Tool savedTool = toolRepository.save(tool);
-        if (savedTool.getStatus() == 0) downTool(oldTool);
-        else if ((savedTool.getStatus() == 3) && (oldTool.getStatus() == 2)) registerToolMovement(savedTool, "Alta de herramienta");
-        else registerToolMovement(savedTool, "Actualización de herramienta");
+        if (savedTool.getStatus() == 0) downTool(savedTool);
+        else if ((savedTool.getStatus() == 3) && (oldTool.getStatus() == 2)) registerToolMovement(savedTool, "Reparacion");
+        else registerToolMovement(savedTool, "Actualizacion de herramienta");
         return savedTool;
     }
 
