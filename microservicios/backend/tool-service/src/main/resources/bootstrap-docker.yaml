@@ -1,12 +1,12 @@
 spring:
   application:
-    name: loan-service
+    name: tool-service
   cloud:
     config:
       enabled: true
-      uri: http://localhost:8081
+      uri: http://config-service:8081
   datasource:
-    url: jdbc:postgresql://localhost:5432/loanservicedb
+    url: jdbc:postgresql://host.docker.internal:5432/toolservicedb
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver
@@ -20,4 +20,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9090/realms/toolrent-realm
+          issuer-uri: http://host.docker.internal:9090/realms/toolrent-realm

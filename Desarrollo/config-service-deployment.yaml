@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: config-service
-          image: eliaszngusach/config-service
+          image: eliaszngusach/config-service:latest
           ports:
             - containerPort: 8081
 ---
