@@ -1,34 +1,40 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: eureka-service-deployment
+  name: eurekaDeployment
   labels:
-    app: eureka-service-deployment
+    app: eurekaDeployment
 spec:
   selector:
     matchLabels:
-      app: eureka-service-deployment
+      app: eurekaDeployment
   replicas: 1
   template:
     metadata:
       labels:
-        app: eureka-service-deployment
+        app: eurekaDeployment
     spec:
       containers:
         - name: eureka-service
           image: eliaszngusach/eureka-service:latest
           ports:
             - containerPort: 8761
+          env:
+          # --- ESTO CONECTA EUREKA CON EL CONFIG SERVER ---
+          - name: SPRING_CLOUD_CONFIG_URI
+            value: "http://config-service:8081"
+          - name: EUREKA_INSTANCE_HOSTNAME
+            value: "localhost"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: eureka-service-service
+  name: eureka-service
   labels:
-    app: eureka-service-service
+    app: eureka-service
 spec:
   selector:
-    app: eureka-service-deployment
+    app: eurekaDeployment
   ports:
     - protocol: TCP
       port: 8761

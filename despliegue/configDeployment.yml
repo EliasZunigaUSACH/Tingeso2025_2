@@ -1,18 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: config-service-deployment
-  labels:
-    app: config-service-deployment
+  name: configDeployment
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: config-service-deployment
-  replicas: 1
+      app: configDeployment
   template:
     metadata:
       labels:
-        app: config-service-deployment
+        app: configDeployment
     spec:
       containers:
         - name: config-service
@@ -23,12 +21,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: config-service-service
+  name: config-service
   labels:
-    app: config-service-service
+    app: config-service
 spec:
   selector:
-    app: config-service-deployment
+    app: configDeployment
   ports:
     - protocol: TCP
       port: 8081
