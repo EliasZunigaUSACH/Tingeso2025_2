@@ -24,6 +24,8 @@ spec:
           
           env:
           # 1. Configuración de Infraestructura
+          - name: SPRING_PROFILES_ACTIVE
+            value: "docker"
           - name: SPRING_CLOUD_CONFIG_URI
             value: "http://config-service:8081"
           - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE

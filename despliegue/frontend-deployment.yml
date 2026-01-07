@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontendDeployment
+  name: frontend-deployment
   labels:
-    app: frontendDeployment
+    app: frontend-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontendDeployment
+      app: frontend-deployment
   template:
     metadata:
       labels:
-        app: frontendDeployment
+        app: frontend-deployment
     spec:
       containers:
       - name: frontend
@@ -28,7 +28,7 @@ metadata:
     app: frontend
 spec:
   selector:
-    app: frontendDeployment
+    app: frontend-deployment
   ports:
     - port: 80
       targetPort: 80

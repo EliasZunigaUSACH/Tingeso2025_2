@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gatewayDeployment
+  name: gateway-deployment
   labels:
-    app: gatewayDeployment
+    app: gateway-deployment
 spec:
   selector:
     matchLabels:
-      app: gatewayDeployment
+      app: gateway-deployment
   replicas: 1
   template:
     metadata:
       labels:
-        app: gatewayDeployment
+        app: gateway-deployment
     spec:
       containers:
         - name: gateway-service
@@ -20,8 +20,14 @@ spec:
           ports:
           - containerPort: 8090
           env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "docker"
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            value: "http://eureka-server:8761/eureka/"
           - name: SERVER_PORT
             value: "8090"
+          - name: SPRING_CONFIG_IMPORT
+            value: "optional:configserver:http://config-service:8081/"
           args:
             - --eureka.client.service-url.defaultZone=http://eureka-service:8761/eureka/
             - --eureka.instance.hostname=gateway-service
@@ -47,7 +53,7 @@ metadata:
     app: gateway-service
 spec:
   selector:
-    app: gatewayDeployment
+    app: gateway-deployment
   ports:
     - protocol: TCP
       port: 8090
