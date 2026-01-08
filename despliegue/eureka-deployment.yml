@@ -25,6 +25,10 @@ spec:
             value: "http://config-service:8081"
           - name: EUREKA_INSTANCE_HOSTNAME
             value: "localhost"
+          - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+            value: "false"
+          - name: EUREKA_CLIENT_FETCH_REGISTRY
+            value: "false"
 ---
 apiVersion: v1
 kind: Service

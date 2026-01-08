@@ -17,6 +17,8 @@ spec:
           image: eliaszngusach/tariff-service:latest
           # ARGS: Tienen la prioridad más alta sobre cualquier application.yml
           args:
+            # Forzar Eureka aquí (Prioridad Máxima)
+            - "--eureka.client.serviceUrl.defaultZone=http://eureka-service:8761/eureka/"
             # URL lógica: Debe ser exacta a lo que dice tu Token (localhost)
             - "--spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:9090/realms/toolrent-realm"
             # URL física: Es por donde el POD realmente sale a buscar las llaves a tu Windows
@@ -28,8 +30,6 @@ spec:
             value: "docker"
           - name: SPRING_CLOUD_CONFIG_URI
             value: "http://config-service:8081"
-          - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
-            value: "http://eureka-service:8761/eureka/"
           - name: SPRING_CLOUD_NETFLIX_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
             value: "http://eureka-service:8761/eureka/"
           - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
